@@ -16,5 +16,9 @@ int main()
   print_info("Dresden<->Berlin", dresden.vector_to(berlin));
   print_info("Berlin<->Dresden", berlin.vector_to(dresden));
 
+  Coord dresden2 { ECEF { 3902745, 954079, 4937071 } };
+
+  printf("Dresden %f %f %f\n", rad_to_deg(dresden2.lat), rad_to_deg(dresden2.lon), dresden2.height);
+
   return 0;
 }

@@ -1,27 +1,44 @@
-#include <cmath>
-
 #pragma once
 
-// More precision than representable in float...
-static const float PI = 3.1415926535897932384626433832795;
+#include <cmath>
+#include "math.hpp"
+#include "wgs84.hpp"
 
-static const float earth_radius = (2 * 6378137 + 6356752) / 3 /* meter */;
+/// Earth-centered, earth-fixed coordinates (cartesian).
+struct ECEF
+{
+  float x, y, z;
+};
 
-static inline float deg_to_rad(float deg) { return deg * PI / 180; }
-static inline float rad_to_deg(float rad) { return rad * 180 / PI; }
-static inline float square(float a) { return a * a; }
-
+/// Angular coordinates.
 class Coord
 {
+public:
+
   float lat; // phi
   float lon; // lambda
 
-public:
+  /// Height of this coordinate over the ellipsoid. This is ignored
+  /// for distance and bearing (for now).
+  float height;
 
-  Coord(float lat, float lon)
-    : lat(lat), lon(lon)
+  Coord(float lat, float lon, float height = 0)
+    : lat(lat), lon(lon), height(0)
   { }
 
+  Coord(ECEF ecef)
+  {
+    float p     = sqrtf(square(ecef.x) + square(ecef.y));
+    float theta = atanf((ecef.z * WGS84::A) / (p * WGS84::B));
+
+    lon = atan2f(ecef.y, ecef.x);
+    lat = atan2f(ecef.z + square(WGS84::E_PRIME) * WGS84::B * cube(sinf(theta)),
+                 (p - square(WGS84::E) * WGS84::A * cube(cosf(theta))));
+
+    float n = WGS84::A / sqrtf(1 - square(WGS84::E) * square(sinf(lat)));
+    height = p / cosf(lat) - n;
+  }
+  
   static Coord from_degrees(float lat, float lon)
   {
     return Coord(deg_to_rad(lat), deg_to_rad(lon));
@@ -35,7 +52,7 @@ public:
     float a = square(sinf(delta_lat / 2))
       + cosf(dst.lat) * cosf(lat) * square(sinf(delta_lon / 2));
 
-    return earth_radius * 2 * atan2f(sqrtf(a), sqrtf(1 - a));
+    return WGS84::earth_radius * 2 * atan2f(sqrtf(a), sqrtf(1 - a));
   }
 
   float bearing_to(Coord dst) const
