@@ -39,9 +39,9 @@ public:
     height = p / cosf(lat) - n;
   }
   
-  static Coord from_degrees(float lat, float lon)
+  static Coord from_degrees(float lat, float lon, float height = 0)
   {
-    return Coord(deg_to_rad(lat), deg_to_rad(lon));
+    return Coord(deg_to_rad(lat), deg_to_rad(lon), height);
   }
 
   float distance_to(Coord dst) const
