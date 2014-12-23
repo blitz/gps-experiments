@@ -36,6 +36,28 @@ public:
         break;
       }
       break;
+    case UBX_NAV_SOL:
+        if (length < sizeof(NAV_SOL))
+          break;
+
+        NAV_SOL const *llh = reinterpret_cast<NAV_SOL *>(&payload[0]);
+
+        auto cv = [] (int32_t v) -> float { return float(v) / 100; };
+
+        printf("NAV SOL fix %u flags %x SVs %u | ", llh->gpsFix, llh->flags,
+               llh->numSV);
+
+        if (llh->flags & 1) {
+          Coord pos { ECEF { cv(llh->ecef_x), cv(llh->ecef_y), cv(llh->ecef_z) } };
+
+          printf("%.4f %.4f +%.0fm (accuracy %.0fm) (%u SVs)",
+                 rad_to_deg(pos.lat), rad_to_deg(pos.lon), pos.height,
+                 float(llh->pAcc) / 100,
+                 llh->numSV);
+        }
+
+        printf("\n");
+        break;
     };
   }
 

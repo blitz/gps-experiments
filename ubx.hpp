@@ -18,6 +18,7 @@ protected:
   /// UBX ID codes
   enum {
     UBX_NAV_POSLLH = 0x02,
+    UBX_NAV_SOL    = 0x06,
   };
 
   /// Navigation solution with angular coordinates.
@@ -29,7 +30,27 @@ protected:
     int32_t  hMSL;              // mm
     int32_t  hAcc;              // mm
     int32_t  vAcc;              // mm
-  };
+  } __attribute__((packed));
+
+  struct NAV_SOL {
+    uint32_t iTOW;              // ms
+    int32_t  fTOW;              // ns
+    int16_t  week;
+    uint8_t  gpsFix;
+    uint8_t  flags;
+    int32_t  ecef_x;            // cm
+    int32_t  ecef_y;            // cm
+    int32_t  ecef_z;            // cm
+    uint32_t pAcc;              // cm
+    int32_t  ecef_vel_x;        // cm
+    int32_t  ecef_vel_y;        // cm
+    int32_t  ecef_vel_z;        // cm
+    uint32_t sAcc;              // cm
+    uint16_t pDOP;
+    uint8_t  _reserved1;
+    uint8_t  numSV;
+    uint32_t _reserved2;
+  } __attribute__((packed));
 
 public:
 
